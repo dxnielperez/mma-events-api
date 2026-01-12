@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const CACHE_PATH = path.join(__dirname, "..", "data", "events.json");
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 const isCacheFresh = () => {
   try {
@@ -26,6 +26,9 @@ const readCache = () => {
 
 const writeCache = (data) => {
   try {
+    // Ensure the directory exists
+    fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true });
+
     fs.writeFileSync(CACHE_PATH, JSON.stringify(data, null, 2));
   } catch (err) {
     console.error("Error writing to cache:", err.message);
