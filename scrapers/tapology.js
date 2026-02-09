@@ -104,7 +104,7 @@ const fetchEventDetails = async (events) => {
 
       /* ---------- ORGANIZATION ---------- */
 
-      let fullOrganization = "Unknown";
+      let fullOrganization = "Other";
       const promoMatch = $("body")
         .text()
         .match(/Promotion:\s*([^\n•]+)/i);
@@ -128,13 +128,13 @@ const fetchEventDetails = async (events) => {
       const organization =
         orgMap[fullOrganization] ||
         majorOrgs.find((o) => event.title.toUpperCase().includes(o)) ||
-        "Unknown";
+        "Other";
 
       const promotionLinks = {};
 
       $("li")
         .filter((_, el) =>
-          $(el).find("span.font-bold").text().includes("Promotion Links")
+          $(el).find("span.font-bold").text().includes("Promotion Links"),
         )
         .find("a[href]")
         .each((_, a) => {
@@ -158,7 +158,7 @@ const fetchEventDetails = async (events) => {
 
       $("ul[data-event-view-toggle-target='list'] li").each((_, el) => {
         const fighterContainers = $(el).find(
-          ".div.flex.flex-row.gap-0\\.5.md\\:gap-0.w-full"
+          ".div.flex.flex-row.gap-0\\.5.md\\:gap-0.w-full",
         );
 
         if (fighterContainers.length < 2) return;
