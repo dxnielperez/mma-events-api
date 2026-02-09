@@ -147,6 +147,7 @@ const fetchEventDetails = async (events) => {
           else if (href.includes("x.com") || href.includes("twitter.com"))
             promotionLinks.twitter = href;
           else if (href.includes("youtube.com")) promotionLinks.youtube = href;
+          else if (href.includes("tiktok.com")) promotionLinks.tiktok = href;
           else if (href.includes("wikipedia.org"))
             promotionLinks.wikipedia = href;
           else promotionLinks.website = href;
