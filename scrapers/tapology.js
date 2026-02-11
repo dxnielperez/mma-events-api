@@ -24,8 +24,7 @@ const isBlockedResponse = (html) => {
     lower.includes("captcha") ||
     lower.includes("cloudflare") ||
     lower.includes("access denied") ||
-    lower.includes("enable javascript") ||
-    html.length < 25000
+    lower.includes("enable javascript")
   );
 };
 
@@ -226,7 +225,7 @@ const fetchEventDetails = async (events) => {
         promotionLinks,
       });
 
-      await delay(2500);
+      await delay(2500 + Math.random() * 2000);
     } catch (err) {
       console.error(`Failed event ${event.link}:`, err.message);
       await delay(8000);
