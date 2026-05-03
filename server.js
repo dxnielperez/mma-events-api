@@ -29,9 +29,18 @@ app.get("/api/events", async (req, res) => {
     writeCache(detailedEvents);
     res.json(detailedEvents);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch events", error: error.message });
+    const stale = readCache();
+    if (stale) {
+      console.warn("Scrape failed, serving stale cache:", error.message);
+      return res.json(stale);
+    }
+
+    const status = error.code === "TAPOLOGY_BLOCKED" ? 503 : 500;
+    res.status(status).json({
+      message: "Failed to fetch events",
+      error: error.message,
+      ...(error.code && { code: error.code }),
+    });
   }
 });
 

@@ -11,12 +11,43 @@ const axiosClient = axios.create({
   headers: {
     "User-Agent":
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    Accept: "text/html,application/xhtml+xml",
+    Accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
     Referer: "https://www.tapology.com/",
     Connection: "keep-alive",
   },
 });
+
+/** Tapology is behind Cloudflare; plain HTTP clients often get 403 without a real browser. */
+const tapologyBlockedError = () => {
+  const err = new Error(
+    "Tapology returned HTTP 403 (Cloudflare). Automated requests from this environment cannot pass the browser check.",
+  );
+  err.code = "TAPOLOGY_BLOCKED";
+  return err;
+};
+
+const fetchHtml = async (url) => {
+  const response = await axiosClient.get(url, {
+    validateStatus: () => true,
+  });
+
+  if (response.status === 403) {
+    throw tapologyBlockedError();
+  }
+  if (response.status !== 200) {
+    const err = new Error(`Request failed with status code ${response.status}`);
+    err.status = response.status;
+    throw err;
+  }
+  return response.data;
+};
 
 const isBlockedResponse = (html) => {
   const lower = html.toLowerCase();
@@ -38,7 +69,7 @@ const fetchUpcomingEvents = async (orgMode = "major") => {
       ? `${baseUrl}/fightcenter?schedule=upcoming`
       : `${baseUrl}/fightcenter?group=major&schedule=upcoming`;
 
-  const { data: html } = await axiosClient.get(url);
+  const html = await fetchHtml(url);
 
   if (isBlockedResponse(html)) {
     throw new Error("Blocked while fetching upcoming events");
@@ -72,7 +103,7 @@ const fetchEventDetails = async (events) => {
 
   for (const event of events) {
     try {
-      const { data: html } = await axiosClient.get(event.link);
+      const html = await fetchHtml(event.link);
 
       if (isBlockedResponse(html)) {
         console.warn(`Blocked or degraded page: ${event.link}`);
